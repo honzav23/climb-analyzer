@@ -1,0 +1,100 @@
+.form-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 10px;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #666;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 40vw;
+  min-width: 200px;
+}
+
+.drop-zone.drag-over {
+  border-color: #007bff;
+  background-color: #eaf5ff;
+}
+
+.drop-zone-text .icon {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.drop-zone-text .icon svg {
+  stroke: #999;
+}
+
+.drop-zone.drag-over .drop-zone-text .icon svg {
+  stroke: #007bff;
+}
+
+.drop-zone p {
+  margin: 5px 0;
+  font-size: 16px;
+}
+
+.or-separator {
+  font-size: 14px;
+  color: #aaa;
+  position: relative;
+  margin: 15px 0;
+}
+
+.or-separator::before,
+.or-separator::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 1px;
+  background-color: #ddd;
+}
+
+.or-separator::before {
+  left: 0;
+}
+
+.or-separator::after {
+  right: 0;
+}
+
+.browse-button:hover {
+  background-color: #0056b3;
+}
+
+.file-name-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+}
+
+.file-name-display strong {
+  word-break: break-all;
+}
+
+.clear-button svg {
+  stroke: currentColor;
+}
+
+.clear-button:hover {
+  color: #d9534f;
+}

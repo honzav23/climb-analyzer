@@ -1,0 +1,28 @@
+<div class="form-wrapper">
+  <div class="drop-zone" [class.drag-over]="isDragOver"
+       (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+    @if (!file) {
+      <div class="drop-zone-text">
+        <span class="icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 14.899A7 7 0 0 1 12 6a7 7 0 0 1 8 8.899"></path>
+          <path d="M12 16L12 23"></path>
+        <path d="M8 20L12 24L16 20"></path>
+        </svg>
+        </span>
+        <p>Drag and drop a file here</p>
+        <p class="or-separator">or</p>
+        <input (change)="onFileSelected($event)" #fileInput type="file" style="display: none;">
+        <p-button size="large" (click)="fileInput.click()">Browse Files</p-button>
+      </div>
+    }
+    @else {
+      <div class="file-name-display">
+        <p>Selected file: <strong>{{ file.name }}</strong></p>
+        <p-button icon="pi pi-times" [text]="true" severity="danger" (click)="clearFile()"/>
+      </div>
+    }
+  </div>
+
+  <p-button [disabled]="!file" (click)="submitForm()" severity="info" icon="pi pi-cloud-upload" size="large" label="Analyze GPX file" iconPos="right"/>
+</div>

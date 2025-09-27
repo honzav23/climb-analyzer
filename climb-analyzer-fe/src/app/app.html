@@ -1,0 +1,6 @@
+<div class="app-wrapper">
+  <file-input (formSubmit)="analyzeClimbs($event)"/>
+  @if (analysisResponse$ | async; as analysisResponse) {
+    <trip-summary-view [tripSummary]="analysisResponse.tripSummary"></trip-summary-view>
+  }
+</div>
