@@ -1,5 +1,24 @@
 <div>
   @if (summary !== null) {
-    <elevation-graph [elevationProfile]="summary.elevationProfile"/>
+    <div class="elevation-summary">
+  <div class="summary-item">
+    <span class="label">Distance</span>
+    <div class="icon-container">
+      <span class="material-symbols-outlined">distance</span>
+      <span class="value">{{ summary.lengthKilometers }} km</span>
+    </div>
+  </div>
+  <div class="summary-item">
+    <span class="label">Elevation gain</span>
+    <div class="icon-container">
+      <span class="material-symbols-outlined">elevation</span>
+      <span class="value">{{ summary.elevationGain }} m</span>
+    </div>
+  </div>
+</div>
+    <p-divider class="text-no-margin"/>
+    <div style="margin-top: 2rem;">
+      <elevation-graph [elevationProfile]="summary.elevationProfile"/>
+    </div>
   }
 </div>

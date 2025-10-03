@@ -1,0 +1,41 @@
+.summary-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.icon-container {
+    display: flex;
+    align-items: center;
+}
+
+.text-no-margin {
+    margin: 0
+}
+
+
+.elevation-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.label {
+  font-size: 0.85em;
+  color: #6a6a6a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.value {
+  font-size: 1.25em;
+  font-weight: bold;
+  color: #333;
+}

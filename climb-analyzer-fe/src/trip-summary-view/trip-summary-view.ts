@@ -1,10 +1,11 @@
 import {Component, input, OnChanges, SimpleChanges} from '@angular/core';
 import { ElevationGraph } from '../elevation-graph/elevation-graph';
 import type {TripSummary} from '../types/AnalysisResponse';
+import { DividerModule } from 'primeng/divider'
 
 @Component({
   selector: 'trip-summary-view',
-  imports: [ElevationGraph],
+  imports: [ElevationGraph, DividerModule],
   templateUrl: './trip-summary-view.html',
   styleUrl: './trip-summary-view.css'
 })
