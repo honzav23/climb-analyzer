@@ -1,0 +1,103 @@
+.climbs-list {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.climb-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.climb-item-content {
+    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+    border-radius: 12px;
+    background-color: white;
+    border-left: 6px solid #50b012;
+    width: 90vw;
+    max-width: 450px;
+    padding: 0;
+}
+.climb-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.card-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.climb-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2px 0 2px 1.5rem;
+    flex-grow: 1;
+    gap: 5px;
+}
+
+.climb-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: gray;
+    margin-bottom: 0.5rem;
+}
+
+.climb-text {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+    font-size: 0.95rem;
+}
+
+
+.text-bold {
+    font-weight: 600;
+}
+
+.value-text {
+    font-weight: 500; /* Slightly thicker for better readability */
+    color: #1f2937;
+}
+
+/* Highlight the Gradient (Color Change: Richer Red) */
+.gradient-highlight {
+    font-weight: 700;
+    color: #c0392b; /* A more distinct, modern red */
+}
+
+.detail-button {
+    background-color: transparent;
+    border: none;
+    border-left: 1px solid #e5e7eb;
+    flex-grow: 0;
+    width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    outline: none;
+    transition: background-color 0.3s ease;
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.detail-button-active {
+    background-color: #b8b8b8;
+}
+
+.detail-button:hover {
+    background-color: lightgray;
+    transition-duration: 0.5s;
+}
+
+.detail-button:active {
+    background-color: #b8b8b8;
+    transition: background-color 0.05s;
+}

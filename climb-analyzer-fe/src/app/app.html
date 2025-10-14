@@ -1,6 +1,22 @@
 <div class="app-wrapper">
-  <file-input (formSubmit)="analyzeClimbs($event)"/>
-  @if (analysisResponse$ | async; as analysisResponse) {
-    <trip-summary-view [tripSummary]="analysisResponse.tripSummary"></trip-summary-view>
-  }
+    <file-input (formSubmit)="analyzeClimbs($event)"/>
+    @if (analysisResponse$ | async; as analysisResponse) {
+        <div style="width: 40vw">
+            <p-tabs value="0">
+                <div style="display: flex; justify-content: center; width: 100%">
+                    <p-tablist>
+                        <p-tab value="0">Trip Summary</p-tab>
+                        <p-tab value="1">Found climbs</p-tab>
+                  </p-tablist>
+              </div>
+              <div style="margin-top: 1rem">
+                  <p-tabpanels>
+                      <p-tabpanel value="0"><trip-summary-view [tripSummary]="analysisResponse.tripSummary" /></p-tabpanel>
+                      <p-tabpanel value="1"><climbs-list [climbs]="analysisResponse.foundClimbs" /></p-tabpanel>
+                  </p-tabpanels>
+              </div>
+          </p-tabs>
+      </div>
+    }
+    <p-toast/>
 </div>

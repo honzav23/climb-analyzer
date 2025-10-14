@@ -1,6 +1,6 @@
 import {Component, OnInit, input, OnChanges, SimpleChanges, OnDestroy} from '@angular/core';
 import Chart from 'chart.js/auto';
-import type { ElevationProfilePlotData } from '../types/AnalysisResponse';
+import type {ElevationProfilePlotData} from '../types/AnalysisResponse';
 
 @Component({
   selector: 'elevation-graph',
@@ -13,23 +13,23 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
   elevationProfile = input<ElevationProfilePlotData[]>([])
 
   ngOnInit() {
-    this.createChart()
+      this.createChart()
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    this.createChart()
+      this.createChart()
   }
 
   ngOnDestroy() {
-    this.chart.destroy();
+      this.chart.destroy();
   }
 
-  createChart(){
-    if (this.chart) {
-      this.chart.destroy();
-    }
-    const distances = this.elevationProfile().map(e => e.distance)
-    const elevations = this.elevationProfile().map(e => e.elevation)
+  createChart() {
+      if (this.chart) {
+        this.chart.destroy();
+      }
+      const distances = this.elevationProfile().map(e => e.distance)
+      const elevations = this.elevationProfile().map(e => e.elevation)
 
     // Round the lowest elevation of the trip to the nearest 100 meters (for example 388 -> 300)
     const minElevation = Math.floor(Math.min(...elevations) / 100) * 100
@@ -73,13 +73,7 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
       }
     };
 
-    // Register the custom plugin before creating the chart
-    if (Chart) {
-      Chart.register(crosshairPlugin);
-      Chart.register(chartAreaBorder);
-    }
-
-    this.chart = new Chart("myGraph", {
+    this.chart = new Chart("elevationGraph", {
       type: 'line',
 
       data: {// values on X-Axis
@@ -94,10 +88,11 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
           }
         ]
       },
+        plugins: [crosshairPlugin, chartAreaBorder],
       options: {
         animation: false,
         plugins: {
-          legend: { display: false },
+          legend: {display: false},
           tooltip: {
             mode: 'index',
             intersect: false,
@@ -116,11 +111,6 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
         aspectRatio: 16 / 9,
         scales: {
           y: {
-            title: {
-              display: true,
-              text: 'Elevation (m)',
-              font: { weight: 'bold', size: 27 },
-            },
             grid: {
               display: false
             },
@@ -130,25 +120,26 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
                 size: 20
               },
               stepSize: 100,
-              callback: function(value, index, ticks) {
+              callback: function (value, index, ticks) {
                 return value + " m"
               }
             }
           },
           x: {
-            title: {
-              display: true,
-              text: 'Distance (km)',
-              font: { weight: 'bold', size: 27 },
-            },
-            grid: {
-              display: false
-            },
+              min: 0,
+              max: distances[distances.length - 1],
+              grid: {
+                  display: true,
+                  color: 'transparent',
+                  drawTicks: true,
+                  tickLength: 15,
+                  tickColor: 'black'
+              },
             ticks: {
               font: {
                 size: 20
               },
-              callback: function(value, index, ticks) {
+              callback: function (value, index, ticks) {
                 const totalPoints = this.ticks.length;
                 const indicesToShow = [
                   0, // Start

@@ -1,0 +1,40 @@
+<div class="climbs-list">
+    @for (climb of climbs(); track climb.start) {
+        <div class="climb-item">
+            <div class="climb-item-content">
+                <div class="card-content">
+                    <div class="climb-info">
+                        <h2 class="climb-name">{{ (climb.start / 1000).toFixed(1) }} km - {{ (climb.end / 1000).toFixed(1) }} km</h2>
+
+                        <div class="climb-text">
+                            <span class="text-bold">Length:</span>
+                            <span class="value-text">{{ (climb.length / 1000).toFixed(1) }} km</span>
+                        </div>
+
+                        <div class="climb-text">
+                            <span class="text-bold">Elevation Gain:</span>
+                            <span class="value-text">{{ climb.elevationGain }} m</span>
+                        </div>
+
+                        <!-- Average Gradient (Highlighted) -->
+                        <div class="climb-text">
+                            <span class="text-bold">Avg. Gradient:</span>
+                            <span class="value-text gradient-highlight">{{ climb.averageGradient.toFixed(1) }}%</span>
+                        </div>
+                    </div>
+                    <button (click)="selectClimb($index)" [className]="selectedClimbGraphs[$index] ? 'detail-button detail-button-active': 'detail-button'">
+                        @if (!selectedClimbGraphs[$index]) {
+                            <span class="material-symbols-outlined">arrow_downward</span>
+                        }
+                        @else {
+                            <span class="material-symbols-outlined">arrow_upward</span>
+                        }
+                    </button>
+                </div>
+            </div>
+            @if (selectedClimbGraphs[$index]) {
+                <climb-graph [climbData]="climbs()[$index]"/>
+            }
+        </div>
+    }
+</div>
