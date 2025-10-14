@@ -1,4 +1,4 @@
-module module/climb-analyzer-be
+module climb-analyzer-be
 
 go 1.25.1
 

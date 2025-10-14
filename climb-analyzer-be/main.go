@@ -5,25 +5,12 @@ import (
 	"net/http"
 	"os"
 
+	"climb-analyzer-be/types"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/tkrajina/gpxgo/gpx"
 )
-
-type ElevationProfilePlotData struct {
-	Distance  float32 `json:"distance"`
-	Elevation int     `json:"elevation"`
-}
-
-type TripSummary struct {
-	LengthKilometers float32                    `json:"lengthKilometers"`
-	ElevationGain    int                        `json:"elevationGain"`
-	ElevationProfile []ElevationProfilePlotData `json:"elevationProfile"`
-}
-
-type AnalysisResponse struct {
-	TripSummary TripSummary `json:"tripSummary"`
-}
 
 func parseGPX() (*gpx.GPX, error) {
 	fileData, err := os.ReadFile("analyze.gpx")
@@ -38,47 +25,65 @@ func parseGPX() (*gpx.GPX, error) {
 	return gpxData, nil
 }
 
-func calculateElevationGain(gpxData *gpx.GPX) int {
-	totalGain := 0
+// Extracts all points and their elevations from the GPX data
+// to have a more convenient structure to work with
+func extractGpxItems(gpxData *gpx.GPX) []types.GpxItem {
+	gpxItems := []types.GpxItem{}
 	for _, track := range gpxData.Tracks {
 		for _, segment := range track.Segments {
 			elevations := segment.Elevations()
-			for i := 1; i < len(elevations); i++ {
-				elevationDiff := elevations[i].Value() - elevations[i-1].Value()
-				if elevationDiff > 0 {
-					totalGain += int(elevationDiff)
-				}
+			points := segment.Points
+			for i := 0; i < len(points); i++ {
+				gpxItems = append(gpxItems, types.GpxItem{Point: points[i], Elevation: elevations[i]})
 			}
+		}
+	}
+	return gpxItems
+}
+
+func calculateElevationGain(gpxItems []types.GpxItem) int {
+	totalGain := 0
+
+	for i := 1; i < len(gpxItems); i++ {
+		elevationDiff := gpxItems[i].Elevation.Value() - gpxItems[i-1].Elevation.Value()
+		if elevationDiff > 0 {
+			totalGain += int(elevationDiff)
 		}
 	}
 	return totalGain
 }
 
-func generateElevationProfile(gpxData *gpx.GPX) []ElevationProfilePlotData {
-	profile := []ElevationProfilePlotData{}
-	profile = append(profile, ElevationProfilePlotData{Distance: 0, Elevation: int(gpxData.Tracks[0].Segments[0].Points[0].Elevation.Value())})
-	distance := float32(0)
-	for _, track := range gpxData.Tracks {
-		for _, segment := range track.Segments {
-			elevations := segment.Elevations()
-			points := segment.Points
-			for i := 1; i < len(points); i++ {
-				distance += float32(points[i].Distance3D(&points[i-1]))
-				profile = append(profile, ElevationProfilePlotData{Distance: distance, Elevation: int(elevations[i].Value())})
-			}
-		}
+func generateElevationProfile(gpxItems []types.GpxItem) []types.ElevationProfilePlotData {
+	profile := []types.ElevationProfilePlotData{}
+	profile = append(profile, types.ElevationProfilePlotData{Distance: 0, Elevation: int(gpxItems[0].Elevation.Value())})
+	distance := float64(0)
+	for i := 0; i < len(gpxItems)-1; i++ {
+		distance += gpxItems[i].Point.Distance3D(&gpxItems[i+1].Point)
+		profile = append(profile, types.ElevationProfilePlotData{Distance: distance, Elevation: int(gpxItems[i].Elevation.Value())})
 	}
 	return profile
 }
 
-func getSummaryInfo(response *AnalysisResponse, gpxData *gpx.GPX) {
-	response.TripSummary = TripSummary{
+func getTripRouteCoordinates(gpxItems []types.GpxItem) []types.PointCoordinates {
+	coordinates := []types.PointCoordinates{}
+	for _, gpxItem := range gpxItems {
+		coordinates = append(coordinates, types.PointCoordinates{Latitude: gpxItem.Point.Latitude, Longitude: gpxItem.Point.Longitude})
+	}
+
+	return coordinates
+}
+
+func getSummaryInfo(response *types.AnalysisResponse, gpxData *gpx.GPX, gpxItems []types.GpxItem) {
+	response.TripSummary = types.TripSummary{
 		LengthKilometers: float32(math.Round(gpxData.Length3D()/100) / 10),
-		ElevationGain:    calculateElevationGain(gpxData),
+		ElevationGain:    calculateElevationGain(gpxItems),
+		ElevationProfile: generateElevationProfile(gpxItems),
+		TripCoordinates:  getTripRouteCoordinates(gpxItems),
 	}
 }
 
 func analyzeClimbs(c *gin.Context) {
+
 	file, err := c.FormFile("file")
 	if err != nil {
 		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "File not provided"})
@@ -90,15 +95,27 @@ func analyzeClimbs(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse GPX file"})
 		return
 	}
-	response := AnalysisResponse{}
-	getSummaryInfo(&response, gpxData)
-	response.TripSummary.ElevationProfile = generateElevationProfile(gpxData)
+	gpxItems := extractGpxItems(gpxData)
+
+	response := types.AnalysisResponse{}
+	getSummaryInfo(&response, gpxData, gpxItems)
+	response.FoundClimbs = IdentifyClimbs(gpxItems)
 	c.IndentedJSON(http.StatusOK, response)
+}
+
+func recoveryMiddleware(c *gin.Context) {
+	defer func() {
+		if r := recover(); r != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "Unexpected error"})
+		}
+	}()
+	c.Next()
 }
 
 func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
+	router.Use(recoveryMiddleware)
 	router.POST("/analyze", analyzeClimbs)
 	router.Run("localhost:8080")
 }
