@@ -6,6 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import type { AnalysisResponse } from '../types/AnalysisResponse';
+import { environment } from '../environments/environment';
 import {AsyncPipe} from '@angular/common';
 import { TabsModule } from "primeng/tabs";
 import { Toast } from "primeng/toast";
@@ -24,7 +25,7 @@ export class App {
     constructor(private http: HttpClient, private messageService: MessageService) { }
 
     analyzeClimbs(formData: FormData) {
-      this.analysisResponse$ = this.http.post<AnalysisResponse>("http://localhost:8080/analyze", formData).pipe(
+      this.analysisResponse$ = this.http.post<AnalysisResponse>(`${environment.apiUrl}/analyze`, formData).pipe(
           catchError((err) => {
               this.messageService.add({ severity: 'error', summary: 'Error', detail: err.error.error });
               return of(null);

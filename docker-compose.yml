@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+     dockerfile: ./climb-analyzer-be/Dockerfile
+    ports:
+     - "8080:8080"
+    extra_hosts:
+     - "host.docker.internal:host-gateway"
+
+  frontend:
+    build:
+      dockerfile: ./climb-analyzer-fe/Dockerfile
+    ports:
+      - "80:80"
+    volumes:
+      - /app/FE/node_modules
+    depends_on:
+       - backend

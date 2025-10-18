@@ -38,7 +38,7 @@ export class MapWrapper implements AfterViewInit {
         const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 this.map.invalidateSize()
-                L.polyline(leafletLine).arrowheads({ frequency: 20, color: "#FFA500", fill: true, size: '12px' }).addTo(this.map);
+                L.polyline(leafletLine, { color: '#FF7F00' }).arrowheads({ frequency: 20, color: "black", yawn: 70, fill: true, size: '12px', weight: 1 }).addTo(this.map);
             }
         })
         observer.observe(this.mapContainer.nativeElement)
