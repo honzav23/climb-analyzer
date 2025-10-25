@@ -12,7 +12,5 @@ services:
       dockerfile: ./climb-analyzer-fe/Dockerfile
     ports:
       - "80:80"
-    volumes:
-      - /app/FE/node_modules
     depends_on:
        - backend
