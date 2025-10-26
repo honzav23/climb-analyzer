@@ -1,4 +1,4 @@
-package main
+package climbAnalyzer
 
 import (
 	"climb-analyzer-be/types"
