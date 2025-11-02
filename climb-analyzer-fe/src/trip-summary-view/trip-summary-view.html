@@ -19,7 +19,7 @@
         <p-divider class="text-no-margin"/>
         <div class="summary-container">
             <elevation-graph [elevationProfile]="summary.elevationProfile"/>
-            <map-wrapper [tripCoords]="summary.tripCoordinates" />
+            <map-wrapper [climbs]="climbs()" [tripCoords]="summary.tripCoordinates" />
         </div>
     }
 </div>

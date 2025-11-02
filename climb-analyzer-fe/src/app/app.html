@@ -11,7 +11,7 @@
               </div>
               <div style="margin-top: 1rem">
                   <p-tabpanels>
-                      <p-tabpanel value="0"><trip-summary-view [tripSummary]="analysisResponse.tripSummary" /></p-tabpanel>
+                      <p-tabpanel value="0"><trip-summary-view [climbs]="analysisResponse.foundClimbs" [tripSummary]="analysisResponse.tripSummary" /></p-tabpanel>
                       <p-tabpanel value="1"><climbs-list [climbs]="analysisResponse.foundClimbs" /></p-tabpanel>
                   </p-tabpanels>
               </div>

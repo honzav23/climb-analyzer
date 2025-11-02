@@ -1,7 +1,7 @@
 import {Component, input, OnChanges, SimpleChanges} from '@angular/core';
 import { ElevationGraph } from '../elevation-graph/elevation-graph';
 import { MapWrapper } from "../map-wrapper/map-wrapper";
-import type {TripSummary} from '../types/AnalysisResponse';
+import type {TripSummary, Climb} from '../types/AnalysisResponse';
 import { DividerModule } from 'primeng/divider'
 
 @Component({
@@ -12,6 +12,7 @@ import { DividerModule } from 'primeng/divider'
 })
 export class TripSummaryView implements OnChanges {
     tripSummary = input<TripSummary | null>(null)
+    climbs = input<Climb[]>([])
     summary: TripSummary | null = null
 
     ngOnChanges(changes: SimpleChanges) {

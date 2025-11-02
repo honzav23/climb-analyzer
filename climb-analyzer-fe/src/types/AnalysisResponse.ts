@@ -23,6 +23,7 @@ export type ElevationProfilePlotData = {
 export type Climb = {
     elevationGain: number;
     climbSegments: ClimbSegment[];
+    climbCoordinates: PointCoordinates[];
     length: number;
     averageGradient: number;
     start: number;
@@ -33,4 +34,5 @@ export type ClimbSegment = {
     elevationProfile: ElevationProfilePlotData[];
     averageGradient: number;
     segmentLength: number;
+    segmentCoordinates: PointCoordinates[];
 }
