@@ -31,12 +31,13 @@ type AnalysisResponse struct {
 }
 
 type Climb struct {
-	ElevationGain   int            `json:"elevationGain"`
-	Length          float64        `json:"length"`
-	AverageGradient float64        `json:"averageGradient"`
-	ClimbSegments   []ClimbSegment `json:"climbSegments"`
-	Start           float64        `json:"start"` // Distance from the beginning of the track where the climb starts
-	End             float64        `json:"end"`   // Distance from the beginning of the track where the climb ends
+	ElevationGain    int                `json:"elevationGain"`
+	Length           float64            `json:"length"`
+	AverageGradient  float64            `json:"averageGradient"`
+	ClimbSegments    []ClimbSegment     `json:"climbSegments"`
+	ClimbCoordinates []PointCoordinates `json:"climbCoordinates"`
+	Start            float64            `json:"start"` // Distance from the beginning of the track where the climb starts
+	End              float64            `json:"end"`   // Distance from the beginning of the track where the climb ends
 }
 
 func (c Climb) IsValidClimb() bool {
@@ -48,9 +49,10 @@ func (c Climb) IsDescendTooBig() bool {
 }
 
 type ClimbSegment struct {
-	ElevationProfile []ElevationProfilePlotData `json:"elevationProfile"`
-	AverageGradient  float64                    `json:"averageGradient"`
-	SegmentLength    float64                    `json:"segmentLength"`
+	ElevationProfile   []ElevationProfilePlotData `json:"elevationProfile"`
+	AverageGradient    float64                    `json:"averageGradient"`
+	SegmentLength      float64                    `json:"segmentLength"`
+	SegmentCoordinates []PointCoordinates         `json:"segmentCoordinates"`
 }
 
 type ClimbGradientRange struct {

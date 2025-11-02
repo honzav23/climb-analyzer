@@ -148,6 +148,7 @@ func IdentifyClimbs(gpxItems []types.GpxItem) []types.Climb {
 
 	for i := range climbs {
 		climbs[i].ClimbSegments = getClimbSegments(distances, gpxItems, climbStartEndIndices[i][0], climbStartEndIndices[i][1])
+		climbs[i].ClimbCoordinates = mergeSegmentCoordinates(climbs[i].ClimbSegments)
 	}
 	return climbs
 }
@@ -224,6 +225,12 @@ func getClimbSegments(distances []float64, gpxItems []types.GpxItem, climbStarti
 	segmentProfile := []types.ElevationProfilePlotData{
 		{Distance: 0, Elevation: int(segmentStartElev)},
 	}
+	segmentCoordinates := []types.PointCoordinates{
+		{
+			Latitude:  gpxItems[segmentStartIdx].Point.Latitude,
+			Longitude: gpxItems[segmentStartIdx].Point.Longitude,
+		},
+	}
 	segmentLength := 0.0
 	segmentElevGain := 0.0
 	segmentGradient := 0.0
@@ -242,23 +249,35 @@ func getClimbSegments(distances []float64, gpxItems []types.GpxItem, climbStarti
 			Elevation: int(curElev),
 		})
 
-		// Split segment if gradient changes significantly
+		segmentCoordinates = append(segmentCoordinates, types.PointCoordinates{
+			Latitude:  gpxItems[i].Point.Latitude,
+			Longitude: gpxItems[i].Point.Longitude,
+		})
+
 		curGradient := calculateGradientPercent(elevDiff, distDiff)
 		prevGradient := calculateGradientPercent(segmentElevGain, segmentLength)
+
+		// Split segment if gradient changes significantly
 		if i < climbEndingIndex && !checkIfClimbGradientsInRange(prevGradient, curGradient) && segmentLength >= 200 {
 			segmentGradient = prevGradient
 			climbSegments = append(climbSegments, types.ClimbSegment{
-				ElevationProfile: segmentProfile,
-				SegmentLength:    segmentLength,
-				AverageGradient:  segmentGradient,
+				ElevationProfile:   segmentProfile,
+				SegmentLength:      segmentLength,
+				AverageGradient:    segmentGradient,
+				SegmentCoordinates: segmentCoordinates,
 			})
+
 			// Start new segment
 			prevDistance := segmentProfile[len(segmentProfile)-1].Distance
-			// segmentStartIdx = i
-			// segmentStartDist = distances[i]
 			segmentStartElev = curElev
 			segmentProfile = []types.ElevationProfilePlotData{
 				{Distance: prevDistance, Elevation: int(segmentStartElev)},
+			}
+			segmentCoordinates = []types.PointCoordinates{
+				{
+					Latitude:  gpxItems[i].Point.Latitude,
+					Longitude: gpxItems[i].Point.Longitude,
+				},
 			}
 			segmentLength = 0.0
 			segmentElevGain = 0.0
@@ -268,12 +287,22 @@ func getClimbSegments(distances []float64, gpxItems []types.GpxItem, climbStarti
 	if segmentLength > 0 {
 		segmentGradient = calculateGradientPercent(segmentElevGain, segmentLength)
 		climbSegments = append(climbSegments, types.ClimbSegment{
-			ElevationProfile: segmentProfile,
-			SegmentLength:    segmentLength,
-			AverageGradient:  segmentGradient,
+			ElevationProfile:   segmentProfile,
+			SegmentLength:      segmentLength,
+			AverageGradient:    segmentGradient,
+			SegmentCoordinates: segmentCoordinates,
 		})
 	}
 	return climbSegments
+}
+
+// Merges all segment coordinates into a single slice of coordinates
+func mergeSegmentCoordinates(segments []types.ClimbSegment) []types.PointCoordinates {
+	coordinates := []types.PointCoordinates{}
+	for _, segment := range segments {
+		coordinates = append(coordinates, segment.SegmentCoordinates...)
+	}
+	return coordinates
 }
 
 // Find hidden climbs in the section that was not identified as a climb
