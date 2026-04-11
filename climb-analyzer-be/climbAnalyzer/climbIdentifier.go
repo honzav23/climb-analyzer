@@ -4,65 +4,9 @@ import (
 	"climb-analyzer-be/types"
 )
 
-func calculateGradientPercent(elevationDiff, distance float64) float64 {
-	if distance == 0 {
-		return 0.0
-	}
-	return (elevationDiff / distance) * 100
-}
-
-// Finds the index of which range the gradient belongs to
-func findRangeIndex(gradient float64, ranges []types.ClimbGradientRange) int {
-	for index, gradientRange := range ranges {
-		if index == 0 {
-			if gradient < gradientRange.GradientTo {
-				return index
-			}
-		} else if index == len(ranges)-1 {
-			if gradient >= gradientRange.GradientFrom {
-				return index
-			}
-		} else {
-			if gradient >= gradientRange.GradientFrom && gradient < gradientRange.GradientTo {
-				return index
-			}
-		}
-	}
-	return -1
-}
-
-// Checks if the current gradient is in the same range as the average gradient
-func checkIfClimbGradientsInRange(averageGradient, currentGradient float64) bool {
-	flat := types.ClimbGradientRange{GradientFrom: 0.0, GradientTo: 3.0}
-	moderate := types.ClimbGradientRange{GradientFrom: 3.0, GradientTo: 7.0}
-	steep := types.ClimbGradientRange{GradientFrom: 7.0, GradientTo: 10.0}
-	verySteep := types.ClimbGradientRange{GradientFrom: 10.0, GradientTo: 100.0}
-
-	gradientRanges := []types.ClimbGradientRange{flat, moderate, steep, verySteep}
-	averageGradientRangeIndex := findRangeIndex(averageGradient, gradientRanges)
-	currentGradientRangeIndex := findRangeIndex(currentGradient, gradientRanges)
-
-	return averageGradientRangeIndex == currentGradientRangeIndex
-}
-
-func getDistancesAndElevationsGainsFromBeginning(gpxItems []types.GpxItem) ([]float64, []int) {
-	distances := make([]float64, len(gpxItems))
-	elevationGains := make([]int, len(gpxItems))
-	distances[0] = 0
-	elevationGains[0] = 0
-
-	for i := 1; i < len(gpxItems); i++ {
-		distances[i] = distances[i-1] + gpxItems[i-1].Point.Distance3D(&gpxItems[i].Point)
-		elevationDiff := gpxItems[i].Elevation.Value() - gpxItems[i-1].Elevation.Value()
-		if elevationDiff > 0 {
-			elevationGains[i] = elevationGains[i-1] + int(elevationDiff)
-		} else {
-			elevationGains[i] = elevationGains[i-1]
-		}
-	}
-	return distances, elevationGains
-}
-
+/**
+ * Identifies climbs within the GPX route
+ */
 func IdentifyClimbs(gpxItems []types.GpxItem) []types.Climb {
 	distances, elevationGains := getDistancesAndElevationsGainsFromBeginning(gpxItems)
 	var (
@@ -132,7 +76,7 @@ func IdentifyClimbs(gpxItems []types.GpxItem) []types.Climb {
 				climbEndingIndex = climbPeakIndex
 
 				finishClimb(&currentClimb, &currentDescent, &climbStarted, &descentStarted, distance)
-				validateClimb(currentClimb, &climbStartEndIndices, climbStartingIndex, climbEndingIndex, &climbs, gpxItems, distances, elevationGains)
+				validateClimb(&currentClimb, &climbStartEndIndices, climbStartingIndex, climbEndingIndex, &climbs, gpxItems, distances, elevationGains)
 				climbStartingIndex = -1
 				climbEndingIndex = -1
 
@@ -141,7 +85,7 @@ func IdentifyClimbs(gpxItems []types.GpxItem) []types.Climb {
 			climbEndingIndex = i + 1
 
 			finishClimb(&currentClimb, &currentDescent, &climbStarted, &descentStarted, distance)
-			validateClimb(currentClimb, &climbStartEndIndices, climbStartingIndex, climbEndingIndex, &climbs, gpxItems, distances, elevationGains)
+			validateClimb(&currentClimb, &climbStartEndIndices, climbStartingIndex, climbEndingIndex, &climbs, gpxItems, distances, elevationGains)
 		}
 		distance += distanceBetweenPoints
 	}
@@ -153,18 +97,87 @@ func IdentifyClimbs(gpxItems []types.GpxItem) []types.Climb {
 	return climbs
 }
 
-func validateClimb(currentClimb types.Climb, climbStartEndIndices *[][2]int, climbStartingIndex int, climbEndingIndex int, climbs *[]types.Climb, gpxItems []types.GpxItem, distances []float64, elevationGains []int) {
+func calculateGradientPercent(elevationDiff, distance float64) float64 {
+	if distance == 0 {
+		return 0.0
+	}
+	return (elevationDiff / distance) * 100
+}
+
+// Finds the index of which range the gradient belongs to
+func findRangeIndex(gradient float64, ranges []types.ClimbGradientRange) int {
+	for index, gradientRange := range ranges {
+		if index == 0 {
+			if gradient < gradientRange.GradientTo {
+				return index
+			}
+		} else if index == len(ranges)-1 {
+			if gradient >= gradientRange.GradientFrom {
+				return index
+			}
+		} else {
+			if gradient >= gradientRange.GradientFrom && gradient < gradientRange.GradientTo {
+				return index
+			}
+		}
+	}
+	return -1
+}
+
+// Checks if the current gradient is in the same range as the average gradient
+func checkIfClimbGradientsInRange(averageGradient, currentGradient float64) bool {
+	flat := types.ClimbGradientRange{GradientFrom: 0.0, GradientTo: 3.0}
+	moderate := types.ClimbGradientRange{GradientFrom: 3.0, GradientTo: 7.0}
+	steep := types.ClimbGradientRange{GradientFrom: 7.0, GradientTo: 10.0}
+	verySteep := types.ClimbGradientRange{GradientFrom: 10.0, GradientTo: 100.0}
+
+	gradientRanges := []types.ClimbGradientRange{flat, moderate, steep, verySteep}
+	averageGradientRangeIndex := findRangeIndex(averageGradient, gradientRanges)
+	currentGradientRangeIndex := findRangeIndex(currentGradient, gradientRanges)
+
+	return averageGradientRangeIndex == currentGradientRangeIndex
+}
+
+/**
+ * Calculate the distance and elevation gain from the beginning of the track for each GPS point, which will be used to identify climbs and descends.
+ */
+func getDistancesAndElevationsGainsFromBeginning(gpxItems []types.GpxItem) ([]float64, []int) {
+	distances := make([]float64, len(gpxItems))
+	elevationGains := make([]int, len(gpxItems))
+	distances[0] = 0
+	elevationGains[0] = 0
+
+	for i := 1; i < len(gpxItems); i++ {
+		distances[i] = distances[i-1] + gpxItems[i-1].Point.Distance3D(&gpxItems[i].Point)
+		elevationDiff := gpxItems[i].Elevation.Value() - gpxItems[i-1].Elevation.Value()
+		if elevationDiff > 0 {
+			elevationGains[i] = elevationGains[i-1] + int(elevationDiff)
+		} else {
+			elevationGains[i] = elevationGains[i-1]
+		}
+	}
+	return distances, elevationGains
+}
+
+/**
+* Validate if the identified climb meets the criteria to be considered a valid climb.
+ */
+func validateClimb(currentClimb *types.Climb, climbStartEndIndices *[][2]int, climbStartingIndex int, climbEndingIndex int, climbs *[]types.Climb, gpxItems []types.GpxItem, distances []float64, elevationGains []int) {
 	if currentClimb.IsValidClimb() {
 		*climbStartEndIndices = append(*climbStartEndIndices, [2]int{climbStartingIndex, climbEndingIndex})
-		*climbs = append(*climbs, currentClimb)
+		*climbs = append(*climbs, *currentClimb)
 	} else {
-		start, end := findHiddenClimbs(climbs, &currentClimb, gpxItems, climbStartingIndex, climbEndingIndex, distances, elevationGains)
-		if start != -1 && end != -1 {
+		start, end := findHiddenClimbs(currentClimb, gpxItems, climbStartingIndex, climbEndingIndex, distances, elevationGains)
+		if start != -1 && end != -1 && currentClimb.IsValidClimb() {
 			*climbStartEndIndices = append(*climbStartEndIndices, [2]int{start, end})
+			*climbs = append(*climbs, *currentClimb)
 		}
 	}
 }
 
+/**
+ * Finish the current climb by setting its end distance and calculating average gradient
+ */
 func finishClimb(currentClimb *types.Climb, currentDescent *types.Climb, climbStarted *bool, descentStarted *bool, distance float64) {
 	// Finish the climb
 
@@ -174,11 +187,13 @@ func finishClimb(currentClimb *types.Climb, currentDescent *types.Climb, climbSt
 
 	if currentClimb.Length > 0 {
 		currentClimb.AverageGradient = calculateGradientPercent(float64(currentClimb.ElevationGain), currentClimb.Length)
-		//currentClimb.Length += currentDescent.Length
 	}
 	*currentDescent = types.Climb{}
 }
 
+/**
+ * Searches for hidden climbs within a given section of GPS points that may not have been identified as a climb due to being part of a longer flat section.
+ */
 func gatherHiddenClimbs(climbPoints []types.GpxItem, distances []float64, elevationGains []int, climbStartingIndex int) (int, int) {
 	bestLength := float64(-1)
 	bestGradient := float64(-1)
@@ -307,7 +322,7 @@ func mergeSegmentCoordinates(segments []types.ClimbSegment) []types.PointCoordin
 
 // Find hidden climbs in the section that was not identified as a climb
 // because there might be short steep sections within a longer flat section
-func findHiddenClimbs(climbs *[]types.Climb, currentClimb *types.Climb, gpxItems []types.GpxItem, climbStartingIndex int, climbEndingIndex int, distances []float64, elevationGains []int) (int, int) {
+func findHiddenClimbs(currentClimb *types.Climb, gpxItems []types.GpxItem, climbStartingIndex int, climbEndingIndex int, distances []float64, elevationGains []int) (int, int) {
 
 	actualClimbStartingIndex, actualClimbEndingIndex := gatherHiddenClimbs(gpxItems[climbStartingIndex:climbEndingIndex+1], distances, elevationGains, climbStartingIndex)
 	if actualClimbStartingIndex == -1 || actualClimbEndingIndex == -1 {
@@ -321,7 +336,6 @@ func findHiddenClimbs(climbs *[]types.Climb, currentClimb *types.Climb, gpxItems
 	currentClimb.ElevationGain = actualClimbElevationGain
 	currentClimb.Start = distances[climbStartingIndex+actualClimbStartingIndex]
 	currentClimb.End = distances[climbStartingIndex+actualClimbEndingIndex]
-	*climbs = append(*climbs, *currentClimb)
 
 	return climbStartingIndex + actualClimbStartingIndex, climbStartingIndex + actualClimbEndingIndex
 }

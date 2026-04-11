@@ -1,6 +1,8 @@
 package types
 
 import (
+	"math"
+
 	"github.com/tkrajina/gpxgo/gpx"
 )
 
@@ -40,8 +42,21 @@ type Climb struct {
 	End              float64            `json:"end"`   // Distance from the beginning of the track where the climb ends
 }
 
+const minClimbLength = 500.0 // in meters
+const minAverageGradient = 3.0
+
+func calculateClimbScore(c Climb) float64 {
+	const refLength = 2000.0 // in meters
+	const refGradient = 0.04
+
+	refRaw := refLength * math.Pow(refGradient-(minAverageGradient/100.0), 1.6)
+	ref := c.Length * math.Pow(math.Max(0, c.AverageGradient/100.0-(minAverageGradient/100.0)), 1.6)
+	return 100 * ref / refRaw
+}
+
 func (c Climb) IsValidClimb() bool {
-	return c.Length >= 500 && c.AverageGradient >= 3.0
+	score := calculateClimbScore(c)
+	return c.Length >= minClimbLength && c.AverageGradient >= minAverageGradient && score >= 20
 }
 
 func (c Climb) IsDescendTooBig() bool {

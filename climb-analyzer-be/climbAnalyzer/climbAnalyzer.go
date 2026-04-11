@@ -39,6 +39,36 @@ func ExtractGpxItems(gpxData *gpx.GPX) []types.GpxItem {
 	return gpxItems
 }
 
+func GetSummaryInfo(response *types.AnalysisResponse, gpxData *gpx.GPX, gpxItems []types.GpxItem) {
+	response.TripSummary = types.TripSummary{
+		LengthKilometers: float32(math.Round(gpxData.Length3D()/100) / 10),
+		ElevationGain:    calculateElevationGain(gpxItems),
+		ElevationProfile: generateElevationProfile(gpxItems),
+		TripCoordinates:  getTripRouteCoordinates(gpxItems),
+	}
+}
+
+func AnalyzeClimbs(c *gin.Context) {
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "File not provided"})
+		return
+	}
+	c.SaveUploadedFile(file, "./analyze.gpx")
+	gpxData, err := ParseGPX()
+	if err != nil {
+		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse GPX file"})
+		return
+	}
+	gpxItems := ExtractGpxItems(gpxData)
+
+	response := types.AnalysisResponse{}
+	GetSummaryInfo(&response, gpxData, gpxItems)
+	response.FoundClimbs = IdentifyClimbs(gpxItems)
+	c.IndentedJSON(http.StatusOK, response)
+}
+
 func calculateElevationGain(gpxItems []types.GpxItem) int {
 	totalGain := 0.0
 
@@ -69,34 +99,4 @@ func getTripRouteCoordinates(gpxItems []types.GpxItem) []types.PointCoordinates 
 	}
 
 	return coordinates
-}
-
-func GetSummaryInfo(response *types.AnalysisResponse, gpxData *gpx.GPX, gpxItems []types.GpxItem) {
-	response.TripSummary = types.TripSummary{
-		LengthKilometers: float32(math.Round(gpxData.Length3D()/100) / 10),
-		ElevationGain:    calculateElevationGain(gpxItems),
-		ElevationProfile: generateElevationProfile(gpxItems),
-		TripCoordinates:  getTripRouteCoordinates(gpxItems),
-	}
-}
-
-func AnalyzeClimbs(c *gin.Context) {
-
-	file, err := c.FormFile("file")
-	if err != nil {
-		c.IndentedJSON(http.StatusBadRequest, gin.H{"error": "File not provided"})
-		return
-	}
-	c.SaveUploadedFile(file, "./analyze.gpx")
-	gpxData, err := ParseGPX()
-	if err != nil {
-		c.IndentedJSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse GPX file"})
-		return
-	}
-	gpxItems := ExtractGpxItems(gpxData)
-
-	response := types.AnalysisResponse{}
-	GetSummaryInfo(&response, gpxData, gpxItems)
-	response.FoundClimbs = IdentifyClimbs(gpxItems)
-	c.IndentedJSON(http.StatusOK, response)
 }

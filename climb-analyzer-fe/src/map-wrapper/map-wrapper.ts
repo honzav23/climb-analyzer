@@ -35,7 +35,7 @@ export class MapWrapper implements AfterViewInit {
         });
 
         tiles.addTo(this.map);
-        L.polyline(leafletLine, { color: '#FF7F00' }).arrowheads({ frequency: 20, color: "black", yawn: 70, fill: true, size: '12px', weight: 1 }).addTo(this.map);
+        L.polyline(leafletLine, { color: '#FF7F00' }).arrowheads({ frequency: 20, color: "black", yawn: 70, size: '12px', weight: 3 }).addTo(this.map);
         for (const climb of this.climbs()) {
             const climbLine: LatLngExpression[] = climb.climbCoordinates.map(coords => [coords.latitude, coords.longitude]);
 
