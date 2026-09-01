@@ -2,7 +2,7 @@
     <file-input (formSubmit)="analyzeClimbs($event)"/>
     @if (analysisResponse$ | async; as analysisResponse) {
         <div style="width: 50vw">
-            <p-tabs value="0">
+            <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($event)">
                 <div style="display: flex; justify-content: center; width: 100%">
                     <p-tablist>
                         <p-tab value="0">Trip Summary</p-tab>
@@ -11,8 +11,10 @@
               </div>
               <div style="margin-top: 1rem">
                   <p-tabpanels>
-                      <p-tabpanel value="0"><trip-summary-view [climbs]="analysisResponse.foundClimbs" [tripSummary]="analysisResponse.tripSummary" /></p-tabpanel>
-                      <p-tabpanel value="1"><climbs-list [climbs]="analysisResponse.foundClimbs" /></p-tabpanel>
+                      <p-tabpanel value="0"><trip-summary-view [climbs]="analysisResponse.foundClimbs" [tripSummary]="analysisResponse.tripSummary" (selectedClimb)="showClimb($event)" /></p-tabpanel>
+                      <p-tabpanel value="1"><climbs-list [climbs]="analysisResponse.foundClimbs" [selectedClimbIndex]="selectedClimbIndex()"
+                            (selectedClimbIndexChange)="selectedClimbIndex.set($event)"
+        /></p-tabpanel>
                   </p-tabpanels>
               </div>
           </p-tabs>

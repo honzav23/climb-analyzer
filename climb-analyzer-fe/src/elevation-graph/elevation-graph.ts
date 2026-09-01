@@ -1,6 +1,6 @@
 import {Component, OnInit, input, OnChanges, SimpleChanges, OnDestroy} from '@angular/core';
 import Chart from 'chart.js/auto';
-import type {ElevationProfilePlotData} from '../types/AnalysisResponse';
+import type {Climb, ElevationProfilePlotData} from '../types/AnalysisResponse';
 
 @Component({
   selector: 'elevation-graph',
@@ -11,6 +11,7 @@ import type {ElevationProfilePlotData} from '../types/AnalysisResponse';
 export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
   chart: any;
   elevationProfile = input<ElevationProfilePlotData[]>([])
+  climbs = input<Climb[]>([])
 
   ngOnInit() {
       this.createChart()
@@ -30,6 +31,13 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
       }
       const distances = this.elevationProfile().map(e => e.distance)
       const elevations = this.elevationProfile().map(e => e.elevation)
+      const climbElevations = this.elevationProfile().map(point => {
+        const isPartOfClimb = this.climbs().some(climb =>
+          point.distance >= climb.start && point.distance <= climb.end
+        )
+
+        return isPartOfClimb ? point.elevation : null
+      })
 
     // Round the lowest elevation of the trip to the nearest 100 meters (for example 388 -> 300)
     const minElevation = Math.floor(Math.min(...elevations) / 100) * 100
@@ -49,7 +57,7 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
           ctx.save();
           ctx.beginPath();
           ctx.lineWidth = 1.5; // Line thickness
-          ctx.strokeStyle = '#0a0a0a'; // Orange color for visibility
+          ctx.strokeStyle = '#0a0a0a'; // Black color for visibility
 
           // Draw the line from the top of the Y-axis to the bottom
           ctx.moveTo(x, yAxis.top);
@@ -84,7 +92,18 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
             fill: true,
             label: "Elevation",
             data: elevations,
-            backgroundColor: '#50b012'
+            backgroundColor: '#50b012',
+            order: 1
+          },
+          {
+            pointRadius: 0,
+            fill: true,
+            label: "Climbs",
+            data: climbElevations,
+            borderColor: '#FF7F00',
+            backgroundColor: '#FF7F00',
+            spanGaps: false,
+            order: 0
           }
         ]
       },
@@ -97,6 +116,7 @@ export class ElevationGraph implements OnInit, OnChanges, OnDestroy {
             mode: 'index',
             intersect: false,
             axis: 'x',
+            filter: item => item.datasetIndex === 0,
             callbacks: {
               title: (context) => {
                 return context.map((c) => {

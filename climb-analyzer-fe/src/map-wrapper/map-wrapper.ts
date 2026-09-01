@@ -1,4 +1,4 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, input } from '@angular/core';
+import { Component, AfterViewInit, ViewChild, ElementRef, input, output } from '@angular/core';
 import type { PointCoordinates, Climb } from "../types/AnalysisResponse";
 import * as L from 'leaflet'
 import 'leaflet-arrowheads'
@@ -17,6 +17,7 @@ export class MapWrapper implements AfterViewInit {
     @ViewChild('map', { static: true }) mapContainer!: ElementRef<HTMLDivElement>;
     tripCoords = input<PointCoordinates[]>([]);
     climbs = input<Climb[]>([]);
+    selectedClimb = output<number>();
 
     ngAfterViewInit() {
         setTimeout(() => {
@@ -36,7 +37,7 @@ export class MapWrapper implements AfterViewInit {
 
         tiles.addTo(this.map);
         L.polyline(leafletLine, { color: '#FF7F00' }).arrowheads({ frequency: 20, color: "black", yawn: 70, size: '12px', weight: 3 }).addTo(this.map);
-        for (const climb of this.climbs()) {
+        for (const [index, climb] of this.climbs().entries()) {
             const climbLine: LatLngExpression[] = climb.climbCoordinates.map(coords => [coords.latitude, coords.longitude]);
 
             // Add the climb start marker
@@ -57,8 +58,13 @@ export class MapWrapper implements AfterViewInit {
                     iconAnchor: [6, 30],
                 })
             }).addTo(this.map);
-            L.polyline(climbLine, { dashArray: '5, 5' }).addTo(this.map);
+            const routeLine = L.polyline(climbLine, { dashArray: '5, 5' }).addTo(this.map);
+            routeLine.on('click', () => {
+                this.selectedClimb.emit(index);
+            });
         }
+
+
 
 
         // Make sure that the map properly resizes after it is rendered in DOM

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FileInput } from '../file-input/file-input';
 import { TripSummaryView } from '../trip-summary-view/trip-summary-view';
 import { ClimbsList } from "../climbs-list/climbs-list";
@@ -22,6 +22,13 @@ import { of } from 'rxjs';
 })
 export class App {
     analysisResponse$: Observable<AnalysisResponse | null> | null = null;
+    activeTab = signal<string | number>('0');
+    selectedClimbIndex = signal<number | null>(null);
+
+    showClimb(index: number): void {
+        this.selectedClimbIndex.set(index);
+        this.activeTab.set('1');
+    }
     constructor(private http: HttpClient, private messageService: MessageService) { }
 
     analyzeClimbs(formData: FormData) {

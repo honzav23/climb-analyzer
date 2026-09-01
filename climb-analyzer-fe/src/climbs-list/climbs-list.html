@@ -22,17 +22,17 @@
                             <span class="value-text gradient-highlight">{{ climb.averageGradient.toFixed(1) }}%</span>
                         </div>
                     </div>
-                    <button (click)="selectClimb($index)" [className]="selectedClimbGraphs[$index] ? 'detail-button detail-button-active': 'detail-button'">
-                        @if (!selectedClimbGraphs[$index]) {
-                            <span class="material-symbols-outlined">arrow_downward</span>
+                    <button (click)="toggleClimb($index)" [className]="selectedClimbIndex() === $index ? 'detail-button detail-button-active': 'detail-button'">
+                        @if (selectedClimbIndex() === $index) {
+                            <span class="material-symbols-outlined">arrow_upward</span>
                         }
                         @else {
-                            <span class="material-symbols-outlined">arrow_upward</span>
+                            <span class="material-symbols-outlined">arrow_downward</span>
                         }
                     </button>
                 </div>
             </div>
-            @if (selectedClimbGraphs[$index]) {
+            @if (selectedClimbIndex() === $index) {
                 <climb-graph [climbData]="climbs()[$index]"/>
             }
         </div>

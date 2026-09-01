@@ -1,4 +1,4 @@
-import {Component, input, SimpleChanges} from '@angular/core';
+import {Component, input, output, SimpleChanges} from '@angular/core';
 import { CardModule } from "primeng/card";
 import { ButtonModule } from "primeng/button";
 import { ClimbGraph } from "../climb-graph/climb-graph";
@@ -14,6 +14,17 @@ import { OnChanges } from "@angular/core";
 export class ClimbsList implements OnChanges {
     climbs = input<Climb[]>([])
     selectedClimbGraphs: boolean[] = []
+
+    selectedClimbIndex = input<number | null>(null);
+    selectedClimbIndexChange = output<number | null>();
+
+    toggleClimb(index: number): void {
+        const nextIndex = this.selectedClimbIndex() === index
+            ? null
+            : index;
+
+        this.selectedClimbIndexChange.emit(nextIndex);
+    }
 
     ngOnChanges(changes: SimpleChanges) {
         this.selectedClimbGraphs = Array(this.climbs().length).fill(false)
