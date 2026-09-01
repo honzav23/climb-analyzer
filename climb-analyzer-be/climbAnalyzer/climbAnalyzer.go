@@ -27,13 +27,15 @@ func ParseGPX() (*gpx.GPX, error) {
 // to have a more convenient structure to work with
 func ExtractGpxItems(gpxData *gpx.GPX) []types.GpxItem {
 	gpxItems := []types.GpxItem{}
+	segmentID := 0
 	for _, track := range gpxData.Tracks {
 		for _, segment := range track.Segments {
 			elevations := segment.Elevations()
 			points := segment.Points
 			for i := 0; i < len(points); i++ {
-				gpxItems = append(gpxItems, types.GpxItem{Point: points[i], Elevation: elevations[i]})
+				gpxItems = append(gpxItems, types.GpxItem{Point: points[i], Elevation: elevations[i], SegmentID: segmentID})
 			}
+			segmentID++
 		}
 	}
 	return gpxItems

@@ -19,6 +19,7 @@ type PointCoordinates struct {
 type GpxItem struct {
 	Point     gpx.GPXPoint
 	Elevation gpx.NullableFloat64
+	SegmentID int
 }
 type TripSummary struct {
 	LengthKilometers float32                    `json:"lengthKilometers"`
